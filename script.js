@@ -66,3 +66,17 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 
 // ---------------------------> LOGIC <---------------------------
+
+const displayMovement = function (_movement) {
+  containerMovements.innerHTML = '';
+  _movement.forEach((el,i) => {
+    const _type = el > 0 ? 'deposit' : 'withdrawal';
+    const htmlTemp = `
+    <div class="movements__row">
+    <div class="movements__type movements__type--${_type}">${i} ${_type}</div>
+    <div class="movements__date">
+    </div> <div class="movements__value">${el}€</div> </div> `;
+    containerMovements.insertAdjacentHTML('afterbegin', htmlTemp);
+  })}
+
+displayMovement(account1.movements);
