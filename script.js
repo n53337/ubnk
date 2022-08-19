@@ -67,6 +67,8 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // ---------------------------> LOGIC <---------------------------
 
+// --> Display Movements
+
 const displayMovement = function (_movement) {
   containerMovements.innerHTML = '';
   _movement.forEach((el,i) => {
@@ -80,3 +82,25 @@ const displayMovement = function (_movement) {
   })}
 
 displayMovement(account1.movements);
+
+// --> Display Balance
+
+const displayBalance = function (movements) {
+  const _balance = movements.reduce((prv,cur)=> prv+cur);
+  labelBalance.textContent = `${_balance}€`;
+}
+
+displayBalance(account1.movements);
+
+// --> Display Summary
+
+const displaySummary = function (movement, interest) {
+  const _in = movement.filter(e=>e>0).reduce((prv,cur)=>prv+cur);
+  const _out = movement.filter(e=>e<0).reduce((prv,cur)=>prv+cur);
+  const _intrest = (_in * interest) /100;
+  labelSumIn.textContent = `${_in}€`;
+  labelSumOut.textContent = `${_out}€`;
+  labelSumInterest.textContent = `${_intrest}€`;
+}
+
+displaySummary(account1.movements, account1.interestRate);
