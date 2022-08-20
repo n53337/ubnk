@@ -67,7 +67,46 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // ---------------------------> LOGIC <---------------------------
 
+
+let _account ;
+
+
+// --> Generate Usernames
+
+
+const genUsrnm = function (_accounts) {
+  _accounts.forEach(el=>{
+    const _usrnm = el.owner.toLowerCase().split(' ').map(e=>e.at(0)).join('');
+    el.username = _usrnm;
+  })
+}
+genUsrnm(accounts);
+
+
+// --> User Login
+
+
+const userLogin = function (_user, _pin) {
+  accounts.forEach(el => {
+    if (_user === el.username && _pin === el.pin) {
+      _account = el;
+      containerApp.style.opacity = '100';
+      console.log('login');
+      displayMovement(_account.movements);
+      displayBalance(_account.movements);
+      displaySummary(_account.movements, _account.interestRate);
+    }
+  });
+}
+
+btnLogin.addEventListener('click',(el)=>{
+  el.preventDefault();
+  userLogin(inputLoginUsername.value, Number(inputLoginPin.value));
+});
+
+
 // --> Display Movements
+
 
 const displayMovement = function (_movement) {
   containerMovements.innerHTML = '';
@@ -81,26 +120,28 @@ const displayMovement = function (_movement) {
     containerMovements.insertAdjacentHTML('afterbegin', htmlTemp);
   })}
 
-displayMovement(account1.movements);
+
 
 // --> Display Balance
+
 
 const displayBalance = function (movements) {
   const _balance = movements.reduce((prv,cur)=> prv+cur);
   labelBalance.textContent = `${_balance}€`;
 }
 
-displayBalance(account1.movements);
 
 // --> Display Summary
 
+
 const displaySummary = function (movement, interest) {
   const _in = movement.filter(e=>e>0).reduce((prv,cur)=>prv+cur);
-  const _out = movement.filter(e=>e<0).reduce((prv,cur)=>prv+cur);
-  const _intrest = (_in * interest) /100;
+  let _out =  movement.filter(e=>e<0);
+  _out.length != 0 ? _out = _out.reduce((prv,cur)=>prv+cur) : 0;
+  const _interest = (_in * interest) /100;
   labelSumIn.textContent = `${_in}€`;
-  labelSumOut.textContent = `${_out}€`;
-  labelSumInterest.textContent = `${_intrest}€`;
+  labelSumOut.textContent = `${Math.abs(_out)}€`;
+  labelSumInterest.textContent = `${_interest}€`;
 }
 
-displaySummary(account1.movements, account1.interestRate);
+// displaySummary(_account.movements, _account.interestRate);
