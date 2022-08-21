@@ -2,7 +2,7 @@
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-                      // BANKIST APP
+                      // UBANK APP
 
 
 // ---------------------------> Data <---------------------------
@@ -74,7 +74,7 @@ let _account ;
 // --> Generate Usernames
 
 
-const genUsrnm = function (_accounts) {
+const genUsrnm = (_accounts)=>{
   _accounts.forEach(el=>{
     const _usrnm = el.owner.toLowerCase().split(' ').map(e=>e.at(0)).join('');
     el.username = _usrnm;
@@ -83,26 +83,12 @@ const genUsrnm = function (_accounts) {
 genUsrnm(accounts);
 
 
-// --> User Login
+// Eventlistner Template
 
 
-const userLogin = function (_user, _pin) {
-  accounts.forEach(el => {
-    if (_user === el.username && _pin === el.pin) {
-      _account = el;
-      containerApp.style.opacity = '100';
-      console.log('login');
-      displayMovement(_account.movements);
-      displayBalance(_account.movements);
-      displaySummary(_account.movements, _account.interestRate);
-    }
-  });
-}
-
-btnLogin.addEventListener('click',(el)=>{
-  el.preventDefault();
-  userLogin(inputLoginUsername.value, Number(inputLoginPin.value));
-});
+const useEventListner = (_element, _type='click', _logic)=>{
+  return _element.addEventListener(_type,_logic);
+};
 
 
 // --> Display Movements
@@ -119,7 +105,6 @@ const displayMovement = function (_movement) {
     </div> <div class="movements__value">${el}€</div> </div> `;
     containerMovements.insertAdjacentHTML('afterbegin', htmlTemp);
   })}
-
 
 
 // --> Display Balance
@@ -144,4 +129,53 @@ const displaySummary = function (movement, interest) {
   labelSumInterest.textContent = `${_interest}€`;
 }
 
-// displaySummary(_account.movements, _account.interestRate);
+
+// --> User Login
+
+
+const userLogin = function (_user, _pin) {
+  accounts.forEach(el => {
+    if (_user === el.username && _pin === el.pin) {
+      // set the current account as the user data
+      _account = el;
+      // make content visible
+      containerApp.style.opacity = '100';
+      // calculate and display data
+      displayMovement(_account.movements);
+      displayBalance(_account.movements);
+      displaySummary(_account.movements, _account.interestRate);
+      // hide the user username and password
+      inputLoginUsername.value = '';
+      inputLoginPin.value = '';
+      // welcome back user
+      labelWelcome.textContent = `What’s up, ${_account.owner}`;
+    }
+  });
+}
+
+useEventListner(btnLogin,'click', (el)=>{
+  el.preventDefault();
+  userLogin(inputLoginUsername.value, Number(inputLoginPin.value));
+});
+
+
+// Transfer Money
+
+
+useEventListner(btnTransfer,'click', (el)=>{
+  el.preventDefault();
+  accounts.forEach(el=>{
+    const accBalance = _account.movements.reduce((prv,curr)=>prv+curr);
+    if (el.username === inputTransferTo.value && Number(inputTransferAmount.value) > 0 && accBalance > Number(inputTransferAmount.value)) {
+      el.movements.push(Number(inputTransferAmount.value));
+      _account.movements.push(-Number(inputTransferAmount.value));
+      inputTransferTo.value = '';
+      inputTransferAmount.value = '';
+      setTimeout(() => {
+        displayBalance(_account.movements);
+        displayMovement(_account.movements);
+        displaySummary(_account.movements, _account.interestRate);
+      }, 500);
+    }
+  })
+});
