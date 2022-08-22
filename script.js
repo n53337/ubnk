@@ -130,6 +130,16 @@ const displaySummary = function (movement, interest) {
 }
 
 
+// --> Refrech UI
+
+
+const refrechUi = (_mov, _int)=>{
+  displayBalance(_mov);
+  displayMovement(_mov);
+  displaySummary(_mov, _int);
+}
+
+
 // --> User Login
 
 
@@ -140,10 +150,8 @@ const userLogin = function (_user, _pin) {
       _account = el;
       // make content visible
       containerApp.style.opacity = '100';
-      // calculate and display data
-      displayMovement(_account.movements);
-      displayBalance(_account.movements);
-      displaySummary(_account.movements, _account.interestRate);
+      // calculate and display UI
+      refrechUi(_account.movements, _account.interestRate);
       // hide the user username and password
       inputLoginUsername.value = '';
       inputLoginPin.value = '';
@@ -166,16 +174,44 @@ useEventListner(btnTransfer,'click', (el)=>{
   el.preventDefault();
   accounts.forEach(el=>{
     const accBalance = _account.movements.reduce((prv,curr)=>prv+curr);
-    if (el.username === inputTransferTo.value && Number(inputTransferAmount.value) > 0 && accBalance > Number(inputTransferAmount.value)) {
+    if (el.username === inputTransferTo.value && Number(inputTransferAmount.value) > 0 && accBalance > Number(inputTransferAmount.value) && inputTransferTo.value != _account.username) {
       el.movements.push(Number(inputTransferAmount.value));
       _account.movements.push(-Number(inputTransferAmount.value));
       inputTransferTo.value = '';
       inputTransferAmount.value = '';
       setTimeout(() => {
-        displayBalance(_account.movements);
-        displayMovement(_account.movements);
-        displaySummary(_account.movements, _account.interestRate);
+      refrechUi(_account.movements, _account.interestRate);
       }, 500);
     }
   })
+});
+
+
+// Request loan
+
+
+useEventListner(btnLoan,'click', (el)=>{
+  el.preventDefault();
+  if (Number(inputLoanAmount.value)>0) {
+    _account.movements.push(Number(inputLoanAmount.value));
+    inputLoanAmount.value = '';
+    setTimeout(() => {
+      refrechUi(_account.movements, _account.interestRate);
+    }, 500);
+  }
+});
+
+
+// Close Account
+
+
+useEventListner(btnClose,'click',(el)=>{
+  el.preventDefault();
+  if (inputCloseUsername.value === _account.username && Number(inputClosePin.value) === _account.pin){
+   const closeAccIndex = accounts.findIndex(e=>e.username === _account.username);
+   accounts.splice(closeAccIndex,1);
+   setTimeout(() => {
+    containerApp.style.opacity = '0';
+   }, 500);
+  }
 });
