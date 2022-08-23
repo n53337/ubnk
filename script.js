@@ -192,9 +192,11 @@ useEventListner(btnTransfer,'click', (el)=>{
 
 useEventListner(btnLoan,'click', (el)=>{
   el.preventDefault();
-  if (Number(inputLoanAmount.value)>0) {
+  const _amount = Number(inputLoanAmount.value);
+  // at least 10% of the requseted loan amount
+  const canLoan = _account.movements.some(e=>e>_amount * .2);
+  if (canLoan && _amount > 0) {
     _account.movements.push(Number(inputLoanAmount.value));
-    inputLoanAmount.value = '';
     setTimeout(() => {
       refrechUi(_account.movements, _account.interestRate);
     }, 500);
@@ -215,3 +217,17 @@ useEventListner(btnClose,'click',(el)=>{
    }, 500);
   }
 });
+
+
+// Sorting
+
+
+let isSorted = true;
+
+useEventListner(btnSort,'click',(el)=>{
+  el.preventDefault();
+  isSorted = !isSorted;
+  let mov = [..._account.movements]
+  !isSorted ? mov = mov.sort((prv,curr)=> prv - curr) : 0;
+  refrechUi(mov, _account.interestRate);
+})
