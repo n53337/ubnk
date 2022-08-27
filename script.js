@@ -2,7 +2,7 @@
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
-                      // UBANK APP
+                      // UBANK APP @n53337
 
 
 // ---------------------------> Data <---------------------------
@@ -91,6 +91,45 @@ const useEventListner = (_element, _type='click', _logic)=>{
 };
 
 
+// current Date
+
+
+const dtNow = ()=>{
+    const _d = new Date();
+    return new Intl.DateTimeFormat('gb-GB',{timeStyle:'medium'}).format(_d);
+};
+
+
+// Timer
+
+
+let timerExist;
+
+const timer = (_seconds)=>{
+  let _min = Math.trunc(_seconds / 60);
+  let _sec = _seconds % 60;
+  const tLogic = ()=>{
+    if (!_sec && _min) {
+      _min--;
+      _sec = 59;
+      labelTimer.textContent = `${String(_min).padStart(2,0)}:${String(_sec).padStart(2,0)}`;
+    }
+    else if(!_min && !_sec){
+      clearInterval(tLogic);
+      containerApp.style.opacity = '0';
+      labelWelcome.textContent = 'Log in to get started';
+    }
+    else {
+      _sec--;
+      labelTimer.textContent = `${String(_min).padStart(2,0)}:${String(_sec).padStart(2,0)}`;
+    }
+  }
+  tLogic();
+  timerExist = setInterval(tLogic , 1000);
+  return timerExist;
+}
+
+
 // --> Display Movements
 
 
@@ -101,8 +140,7 @@ const displayMovement = function (_movement) {
     const htmlTemp = `
     <div class="movements__row">
     <div class="movements__type movements__type--${_type}">${i} ${_type}</div>
-    <div class="movements__date">
-    </div> <div class="movements__value">${el}€</div> </div> `;
+    <div class="movements__value">${el.toFixed(2)}€</div> </div> `;
     containerMovements.insertAdjacentHTML('afterbegin', htmlTemp);
   })}
 
@@ -111,8 +149,12 @@ const displayMovement = function (_movement) {
 
 
 const displayBalance = function (movements) {
-  const _balance = movements.reduce((prv,cur)=> prv+cur);
+  const _balance = movements.reduce((prv,cur)=> prv+cur).toFixed(2);
   labelBalance.textContent = `${_balance}€`;
+  // display Date
+  setInterval(() => {
+    labelDate.textContent = dtNow();
+  }, 1000);
 }
 
 
@@ -120,10 +162,10 @@ const displayBalance = function (movements) {
 
 
 const displaySummary = function (movement, interest) {
-  const _in = movement.filter(e=>e>0).reduce((prv,cur)=>prv+cur);
+  const _in = movement.filter(e=>e>0).reduce((prv,cur)=>prv+cur).toFixed(2);
   let _out =  movement.filter(e=>e<0);
-  _out.length != 0 ? _out = _out.reduce((prv,cur)=>prv+cur) : 0;
-  const _interest = (_in * interest) /100;
+  _out.length != 0 ? _out = _out.reduce((prv,cur)=>prv+cur).toFixed(2) : 0;
+  const _interest = ((_in * interest) /100).toFixed(2);
   labelSumIn.textContent = `${_in}€`;
   labelSumOut.textContent = `${Math.abs(_out)}€`;
   labelSumInterest.textContent = `${_interest}€`;
@@ -157,6 +199,14 @@ const userLogin = function (_user, _pin) {
       inputLoginPin.value = '';
       // welcome back user
       labelWelcome.textContent = `What’s up, ${_account.owner}`;
+      // start timer
+      if (!timerExist) {
+        timer(300);
+      }
+      else{
+        clearInterval(timerExist);
+        timer(300);
+      }
     }
   });
 }
@@ -173,7 +223,7 @@ useEventListner(btnLogin,'click', (el)=>{
 useEventListner(btnTransfer,'click', (el)=>{
   el.preventDefault();
   accounts.forEach(el=>{
-    const accBalance = _account.movements.reduce((prv,curr)=>prv+curr);
+    const accBalance = _account.movements.reduce((prv,curr)=>prv+curr).toFixed(2);
     if (el.username === inputTransferTo.value && Number(inputTransferAmount.value) > 0 && accBalance > Number(inputTransferAmount.value) && inputTransferTo.value != _account.username) {
       el.movements.push(Number(inputTransferAmount.value));
       _account.movements.push(-Number(inputTransferAmount.value));
@@ -192,7 +242,7 @@ useEventListner(btnTransfer,'click', (el)=>{
 
 useEventListner(btnLoan,'click', (el)=>{
   el.preventDefault();
-  const _amount = Number(inputLoanAmount.value);
+  const _amount = Number(inputLoanAmount.value).toFixed(2);
   // at least 10% of the requseted loan amount
   const canLoan = _account.movements.some(e=>e>_amount * .2);
   if (canLoan && _amount > 0) {
@@ -214,6 +264,7 @@ useEventListner(btnClose,'click',(el)=>{
    accounts.splice(closeAccIndex,1);
    setTimeout(() => {
     containerApp.style.opacity = '0';
+    labelWelcome.textContent = 'Log in to get started';
    }, 500);
   }
 });
@@ -230,4 +281,4 @@ useEventListner(btnSort,'click',(el)=>{
   let mov = [..._account.movements]
   !isSorted ? mov = mov.sort((prv,curr)=> prv - curr) : 0;
   refrechUi(mov, _account.interestRate);
-})
+});
