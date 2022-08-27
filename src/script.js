@@ -231,6 +231,9 @@ useEventListner(btnTransfer,'click', (el)=>{
       inputTransferAmount.value = '';
       setTimeout(() => {
       refrechUi(_account.movements, _account.interestRate);
+      // reset timer
+      clearInterval(timerExist);
+      timer(300);
       }, 500);
     }
   })
@@ -249,6 +252,9 @@ useEventListner(btnLoan,'click', (el)=>{
     _account.movements.push(Number(inputLoanAmount.value));
     setTimeout(() => {
       refrechUi(_account.movements, _account.interestRate);
+      // reset timer
+      clearInterval(timerExist);
+      timer(300);
     }, 500);
   }
 });
@@ -281,4 +287,7 @@ useEventListner(btnSort,'click',(el)=>{
   let mov = [..._account.movements]
   !isSorted ? mov = mov.sort((prv,curr)=> prv - curr) : 0;
   refrechUi(mov, _account.interestRate);
+  // reset timer
+  clearInterval(timerExist);
+  timer(300);
 });
